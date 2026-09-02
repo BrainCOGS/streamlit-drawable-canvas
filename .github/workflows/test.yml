@@ -1,0 +1,38 @@
+name: Test
+
+on:
+  push:
+    branches: [develop, main, master]
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The component reaches into private Streamlit APIs (image_to_url,
+        # _config), so it is tested against several Streamlit versions rather
+        # than one. tests/test_streamlit_seams.py is what catches a move.
+        streamlit-version: ["1.61.1", "1.62.0", "1.63.0"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . -r requirements-dev.txt
+          pip install "streamlit==${{ matrix.streamlit-version }}"
+
+      - name: Show resolved versions
+        run: pip list | grep -Ei "streamlit|pillow|numpy"
+
+      # No Node build step: declare_component records the frontend path without
+      # stating it, so the Python suite runs against an unbuilt checkout.
+      - name: Run tests
+        run: pytest tests/ -v

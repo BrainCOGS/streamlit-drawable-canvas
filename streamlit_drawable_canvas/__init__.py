@@ -1,4 +1,5 @@
 import base64
+import inspect
 import io
 import os
 from dataclasses import dataclass
@@ -43,6 +44,28 @@ def _data_url_to_image(data_url: str) -> Image:
     """Convert DataURL string to the image."""
     _, _data_url = data_url.split(";base64,")
     return Image.open(io.BytesIO(base64.b64decode(_data_url)))
+
+
+def _image_to_url(img: Image, width: int, image_id: str) -> str:
+    """Call Streamlit's private ``image_to_url`` across its signature changes.
+
+    Streamlit replaced the positional ``width: int`` parameter with
+    ``layout_config: LayoutConfig``. Passing the old int to a new Streamlit raises
+    ``'int' object has no attribute 'width'`` from deep inside Streamlit, and the
+    failure only shows up when a caller actually supplies ``background_image``.
+
+    The parameter name is inspected rather than the Streamlit version being pinned,
+    so this keeps working in both directions across the wide range declared in
+    setup.py. See tests/test_streamlit_seams.py.
+    """
+    params = list(inspect.signature(st_image.image_to_url).parameters)
+    if len(params) > 1 and params[1] == "layout_config":
+        from streamlit.elements.lib.layout_utils import LayoutConfig
+
+        size = LayoutConfig(width=width)
+    else:
+        size = width
+    return st_image.image_to_url(img, size, True, "RGB", "PNG", image_id)
 
 
 def _resize_img(img: Image, new_height: int = 700, new_width: int = 700) -> Image:
@@ -122,8 +145,10 @@ def st_canvas(
     if background_image:
         background_image = _resize_img(background_image, height, width)
         # Reduce network traffic and cache when switch another configure, use streamlit in-mem filemanager to convert image to URL
-        background_image_url = st_image.image_to_url(
-            background_image, width, True, "RGB", "PNG", f"drawable-canvas-bg-{md5(background_image.tobytes()).hexdigest()}-{key}" 
+        background_image_url = _image_to_url(
+            background_image,
+            width,
+            f"drawable-canvas-bg-{md5(background_image.tobytes()).hexdigest()}-{key}",
         )
         background_image_url = st._config.get_option("server.baseUrlPath") + background_image_url
         background_color = ""
@@ -151,7 +176,7 @@ def st_canvas(
         default=None,
     )
     if component_value is None:
-        return CanvasResult
+        return CanvasResult()
 
     return CanvasResult(
         np.asarray(_data_url_to_image(component_value["data"])),
