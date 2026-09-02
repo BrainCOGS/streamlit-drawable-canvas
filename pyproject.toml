@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "streamlit-drawable-canvas"
+version = "0.9.4"
+description = "A Streamlit custom component for a free drawing canvas using Fabric.js."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Fanilo ANDRIANASOLO", email = "contact@andfanilo.com" }]
+keywords = ["streamlit", "canvas", "drawing", "fabricjs"]
+classifiers = [
+    "Framework :: Streamlit",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Widgets",
+]
+dependencies = [
+    "Pillow",
+    "numpy",
+    # This component calls private Streamlit helpers (image_utils.image_to_url,
+    # _config.get_option). 1.36 is the oldest release the current call shapes are
+    # known to work against; tests/test_streamlit_seams.py is what catches a move.
+    "streamlit>=1.36",
+]
+
+[project.urls]
+Homepage = "https://github.com/andfanilo/streamlit-drawable-canvas"
+Source = "https://github.com/BrainCOGS/streamlit-drawable-canvas"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["streamlit_drawable_canvas*"]
+
+[tool.setuptools.package-data]
+# Ships the compiled frontend. Replaces the old MANIFEST.in recursive-include.
+streamlit_drawable_canvas = ["frontend/build/**/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

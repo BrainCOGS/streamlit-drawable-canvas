@@ -222,7 +222,7 @@ export const CanvasStateProvider = ({
   // Setup our callback functions
   // We memoize with useCallback to prevent unnecessary re-renders
   const saveState = useCallback(
-    (state) => dispatch({ type: "save", state: state }),
+    (state: Object) => dispatch({ type: "save", state: state }),
     [dispatch]
   )
   const undo = useCallback(() => dispatch({ type: "undo" }), [dispatch])
@@ -232,7 +232,7 @@ export const CanvasStateProvider = ({
     [dispatch]
   )
   const resetState = useCallback(
-    (state) => dispatch({ type: "reset", state: state }),
+    (state: Object) => dispatch({ type: "reset", state: state }),
     [dispatch]
   )
 

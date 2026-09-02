@@ -138,37 +138,54 @@ st_canvas(initial_drawing=canvas_result.json_data)
 
 ### Install
 
-- JS side
+- JS side (the frontend lives in `streamlit_drawable_canvas/frontend`)
 
 ```shell script
-cd frontend
-npm install
+cd streamlit_drawable_canvas/frontend
+pnpm install
 ```
 
 - Python side
 
 ```shell script
-conda create -n streamlit-drawable-canvas python=3.7
-conda activate streamlit-drawable-canvas
-pip install -e .
+python -m venv .venv && source .venv/bin/activate
+pip install -e . -r requirements-dev.txt
 ```
 
 ### Run
 
-Both webpack dev server and Streamlit should run at the same time.
+Both the Vite dev server and Streamlit should run at the same time. Set
+`_RELEASE = False` in `streamlit_drawable_canvas/__init__.py` first, so the
+component loads from the dev server on port 3001 instead of `frontend/build`.
 
 - JS side
 
 ```shell script
-cd frontend
-npm run start
+cd streamlit_drawable_canvas/frontend
+pnpm start
 ```
 
 - Python side
 
 ```shell script
-streamlit run app.py
+streamlit run e2e/app_to_test.py
 ```
+
+### Build
+
+```shell script
+cd streamlit_drawable_canvas/frontend
+pnpm build          # tsc --noEmit, then vite build into frontend/build
+```
+
+### Python tests
+
+```shell script
+pytest tests/
+```
+
+The frontend does **not** need to be built to run the Python suite --
+`declare_component` records the frontend path without stating it.
 
 ### Cypress integration tests
 
