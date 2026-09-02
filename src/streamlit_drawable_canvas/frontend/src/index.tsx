@@ -1,15 +1,17 @@
 import React from "react"
-import ReactDOM from "react-dom"
+import { createRoot } from "react-dom/client"
 import DrawableCanvas from "./DrawableCanvas"
 import { CanvasStateProvider } from "./DrawableCanvasState"
 
 import "./index.css"
 
-ReactDOM.render(
+const container = document.getElementById("root")
+if (!container) throw new Error("Root container #root is missing from index.html")
+
+createRoot(container).render(
   <React.StrictMode>
     <CanvasStateProvider>
       <DrawableCanvas />
     </CanvasStateProvider>
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 )

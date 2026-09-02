@@ -1,0 +1,12 @@
+packages:
+  - "."
+
+allowBuilds:
+  canvas: set this to true or false
+  esbuild: set this to true or false
+
+# esbuild must run its postinstall to unpack the platform binary Vite needs.
+# fabric's optional node-canvas dependency is server-side only, needs a native
+# toolchain, and is deliberately left unbuilt.
+onlyBuiltDependencies:
+  - esbuild
