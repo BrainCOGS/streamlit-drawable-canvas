@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: streamlit_drawable_canvas/frontend
+        working-directory: src/streamlit_drawable_canvas/frontend
     steps:
       - uses: actions/checkout@v4
 
@@ -53,7 +53,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: streamlit_drawable_canvas/frontend/pnpm-lock.yaml
+          cache-dependency-path: src/streamlit_drawable_canvas/frontend/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
 

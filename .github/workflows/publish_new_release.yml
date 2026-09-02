@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: streamlit_drawable_canvas/frontend/pnpm-lock.yaml
+          cache-dependency-path: src/streamlit_drawable_canvas/frontend/pnpm-lock.yaml
 
       # The wheel ships frontend/build (see [tool.setuptools.package-data]), so
       # the JS must be built before the Python package.
@@ -32,24 +32,41 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           pnpm build
-        working-directory: streamlit_drawable_canvas/frontend
+        working-directory: src/streamlit_drawable_canvas/frontend
 
       - name: Build the distributions
         run: |
           python -m pip install --upgrade pip build
           python -m build
 
-      - name: Check the frontend actually made it into the wheel
+      - name: Check the distributions before uploading
         run: |
           python -m pip install --upgrade twine
           twine check dist/*
           python - <<'PY'
-          import glob, sys, zipfile
+          import glob, sys, tarfile, zipfile
+
           wheel = sorted(glob.glob("dist/*.whl"))[-1]
-          assets = [n for n in zipfile.ZipFile(wheel).namelist() if "frontend/build" in n]
-          print(f"{wheel}: {len(assets)} frontend files")
-          if not assets:
+          names = zipfile.ZipFile(wheel).namelist()
+
+          # 0.9.4 shipped two byte-identical top-level packages because a renamed
+          # copy was lying around at publish time, and its sdist shipped only the
+          # wrong one -- so `pip install --no-binary` failed with ModuleNotFoundError.
+          tops = {n.split("/")[0] for n in names if not n.endswith(".dist-info")}
+          tops = {t for t in tops if not t.endswith(".dist-info")}
+          if tops != {"streamlit_drawable_canvas"}:
+              sys.exit(f"wheel must contain exactly one package, found: {sorted(tops)}")
+
+          if not [n for n in names if "frontend/build" in n]:
               sys.exit("frontend/build is missing from the wheel -- did the JS build run?")
+
+          sdist = sorted(glob.glob("dist/*.tar.gz"))[-1]
+          with tarfile.open(sdist) as tf:
+              members = tf.getnames()
+          if not [m for m in members if "/streamlit_drawable_canvas/" in m]:
+              sys.exit("sdist does not contain the streamlit_drawable_canvas package")
+
+          print(f"OK: {wheel} and {sdist} both look right")
           PY
 
       - name: Publish

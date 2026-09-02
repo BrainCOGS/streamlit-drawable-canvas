@@ -3,8 +3,12 @@ requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "streamlit-drawable-canvas"
-version = "0.9.4"
+# The distribution name must stay "-fork": "streamlit-drawable-canvas" on PyPI is
+# andfanilo's upstream project, which this org cannot publish to. The *import*
+# package deliberately stays "streamlit_drawable_canvas" so downstream code keeps
+# working unchanged -- see [tool.setuptools.packages.find] below.
+name = "streamlit-drawable-canvas-fork"
+version = "0.9.5"
 description = "A Streamlit custom component for a free drawing canvas using Fabric.js."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -34,10 +38,17 @@ Source = "https://github.com/BrainCOGS/streamlit-drawable-canvas"
 dev = ["pytest>=8"]
 
 [tool.setuptools.packages.find]
-include = ["streamlit_drawable_canvas*"]
+# src layout: only what lives under src/ is packaged. 0.9.4 was published from a flat
+# tree that had a renamed copy of the package lying beside the original, so its wheel
+# carried two byte-identical top-level packages (streamlit_drawable_canvas and
+# streamlit_drawable_canvas_fork) and its sdist carried only the latter -- which made
+# `pip install --no-binary` fail with ModuleNotFoundError. Under src/ a stray sibling
+# at the repo root cannot be picked up by discovery at all.
+where = ["src"]
 
 [tool.setuptools.package-data]
-# Ships the compiled frontend. Replaces the old MANIFEST.in recursive-include.
+# Ships the compiled frontend (built into src/streamlit_drawable_canvas/frontend/build).
+# Replaces the old MANIFEST.in recursive-include.
 streamlit_drawable_canvas = ["frontend/build/**/*"]
 
 [tool.pytest.ini_options]

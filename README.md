@@ -138,10 +138,10 @@ st_canvas(initial_drawing=canvas_result.json_data)
 
 ### Install
 
-- JS side (the frontend lives in `streamlit_drawable_canvas/frontend`)
+- JS side (the frontend lives in `src/streamlit_drawable_canvas/frontend`)
 
 ```shell script
-cd streamlit_drawable_canvas/frontend
+cd src/streamlit_drawable_canvas/frontend
 pnpm install
 ```
 
@@ -161,7 +161,7 @@ component loads from the dev server on port 3001 instead of `frontend/build`.
 - JS side
 
 ```shell script
-cd streamlit_drawable_canvas/frontend
+cd src/streamlit_drawable_canvas/frontend
 pnpm start
 ```
 
@@ -174,7 +174,7 @@ streamlit run e2e/app_to_test.py
 ### Build
 
 ```shell script
-cd streamlit_drawable_canvas/frontend
+cd src/streamlit_drawable_canvas/frontend
 pnpm build          # tsc --noEmit, then vite build into frontend/build
 ```
 
@@ -190,7 +190,7 @@ The frontend does **not** need to be built to run the Python suite --
 ### Cypress integration tests
 
 - Install Cypress: `cd e2e; npm i` or `npx install cypress` (with `--force` if cache problem)
-- Start Streamlit frontend server: `cd streamlit_drawable_canvas/frontend; npm run start`
+- Start Streamlit frontend server: `cd src/streamlit_drawable_canvas/frontend; npm run start`
 - Start Streamlit test script: `streamlit run e2e/app_to_test.py`
 - Start Cypress app: `cd e2e; npm run cypress:open`
 
