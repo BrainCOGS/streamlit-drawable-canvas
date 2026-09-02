@@ -8,6 +8,14 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      # Trusted Publishing: PyPI verifies this workflow's OIDC identity, so no API
+      # token or password is stored as a secret. Configure the publisher once at
+      # https://pypi.org/manage/project/streamlit-drawable-canvas-fork/settings/publishing/
+      # (owner BrainCOGS, repo streamlit-drawable-canvas, workflow
+      # publish_new_release.yml, environment pypi).
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -69,8 +77,7 @@ jobs:
           print(f"OK: {wheel} and {sdist} both look right")
           PY
 
+      # PyPI stopped accepting username/password uploads, so the old
+      # TWINE_USERNAME/TWINE_PASSWORD secrets could not work even if they were set.
       - name: Publish
-        env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: twine upload dist/*
+        uses: pypa/gh-action-pypi-publish@release/v1
